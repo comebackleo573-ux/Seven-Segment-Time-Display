@@ -117,19 +117,13 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     miniMenu.setDimensions(Settings_Menu, 115, 85)
     miniMenu.onButtonPressed(Settings_Menu, miniMenu.Button.A, function (selection, selectedIndex) {
         if (selectedIndex == 0) {
-            if (!(Military_Time_Boolem)) {
-                Military_Time_Boolem = true
-            } else {
-                Military_Time_Boolem = false
-            }
-            miniMenu.close(Settings_Menu)
+            Military_Time_Boolem = !(Military_Time_Boolem)
+            settings.writeNumber("military_time_setting", Military_Time_Boolem ? 1 : 0)
+miniMenu.close(Settings_Menu)
         } else if (selectedIndex == 1) {
-            if (!(Date_Boolem)) {
-                Date_Boolem = true
-            } else {
-                Date_Boolem = false
-            }
-            miniMenu.close(Settings_Menu)
+            Date_Boolem = !(Date_Boolem)
+            settings.writeNumber("date_setting", Date_Boolem ? 1 : 0)
+miniMenu.close(Settings_Menu)
         } else if (selectedIndex == 2) {
             miniMenu.close(Settings_Menu)
         }
@@ -155,6 +149,8 @@ function getMonth (month: number) {
     ][month]
 }
 let Settings_Menu: Sprite = null
+let Date_Boolem = false
+let Military_Time_Boolem = false
 scene.setBackgroundColor(13)
 let Hour = sevenseg.createCounter(SegmentStyle.Thick, SegmentScale.Full, 2)
 let Minutes = sevenseg.createCounter(SegmentStyle.Thick, SegmentScale.Full, 2)
@@ -206,8 +202,16 @@ Seconds.y += 8
 Seconds.x += 60
 AMPM.x += -50
 AMPM.y += -8
-let Military_Time_Boolem = false
-let Date_Boolem = false
+if (!(settings.exists("military_time_setting"))) {
+    settings.writeNumber("military_time_setting", 0)
+}
+if (!(settings.exists("date_setting"))) {
+    settings.writeNumber("date_setting", 0)
+}
+let loadedMilitaryTime = settings.readNumber("military_time_setting")
+let loadedDateToggle = settings.readNumber("date_setting")
+Military_Time_Boolem = loadedMilitaryTime == 1
+Date_Boolem = loadedDateToggle == 1
 game.onShade(() => {
     const time = browserEvents.currentTime();
     const rawHours = browserEvents.getHours(time);
@@ -222,9 +226,9 @@ game.onShade(() => {
         Hour.count = hours12;
 
         if (rawHours >= 12) {
-            AMPM.setDigitAlpha(SegmentCharacter.P); // Displays "P"
+            AMPM.setDigitAlpha(SegmentCharacter.P);
         } else {
-            AMPM.setDigitAlpha(SegmentCharacter.A); // Displays "A"
+            AMPM.setDigitAlpha(SegmentCharacter.A);
         }
     }
 
